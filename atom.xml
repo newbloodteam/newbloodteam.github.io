@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Sugite</title>
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://www.dengbo.me/"/>
+  <updated>2017-08-31T06:13:55.000Z</updated>
+  <id>http://www.dengbo.me/</id>
+  
+  <author>
+    <name>Sugite</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>iOS中的Hit-Testing</title>
+    <link href="http://www.dengbo.me/2016/08/17/iOS%E4%B8%AD%E7%9A%84Hit-Testing/"/>
+    <id>http://www.dengbo.me/2016/08/17/iOS中的Hit-Testing/</id>
+    <published>2016-08-17T12:14:42.000Z</published>
+    <updated>2017-08-31T06:13:55.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;问题背景&quot;&gt;&lt;a href=&quot;#问题背景&quot; class=&quot;headerlink&quot; title=&quot;问题背景&quot;&gt;&lt;/a&gt;问题背景&lt;/h2&gt;&lt;p&gt;美团iOS客户端电影频道中，影院列表的界面如下所示：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;url&quot;&gt;&lt;img src=&quot;http
+    
+    </summary>
+    
+    
+      <category term="iOS" scheme="http://www.dengbo.me/tags/iOS/"/>
+    
+  </entry>
+  
+</feed>
