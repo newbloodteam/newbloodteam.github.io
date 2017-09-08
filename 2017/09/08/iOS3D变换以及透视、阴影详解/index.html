@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>iOS3D变换以及透视、阴影详解 | Sugite</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="iOS,Core Animation," />
+  
+
+  <meta name="description" content="Background最近在学习iOS Core Animation相关的内容，第五章3D变换里有一个Demo，是在屏幕上显示一个正方体，并且为其添加光照阴影，效果图如下所示：  Problem可以看到，最终的效果还是可以的，书中给出的代码具体如下： 123456789101112131415161718192021222324252627282930313233343536373839404142">
+<meta name="keywords" content="iOS,Core Animation">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS3D变换以及透视、阴影详解">
+<meta property="og:url" content="http://www.dengbo.me/2017/09/08/iOS3D变换以及透视、阴影详解/index.html">
+<meta property="og:site_name" content="Sugite">
+<meta property="og:description" content="Background最近在学习iOS Core Animation相关的内容，第五章3D变换里有一个Demo，是在屏幕上显示一个正方体，并且为其添加光照阴影，效果图如下所示：  Problem可以看到，最终的效果还是可以的，书中给出的代码具体如下： 123456789101112131415161718192021222324252627282930313233343536373839404142">
+<meta property="og:locale" content="zh-TW">
+<meta property="og:image" content="http://7otic0.com1.z0.glb.clouddn.com/%E6%9C%AA%E5%91%BD%E5%90%8D%202.png">
+<meta property="og:image" content="http://7otic0.com1.z0.glb.clouddn.com/%E5%9D%90%E6%A0%87%E7%B3%BB.png">
+<meta property="og:image" content="http://7otic0.com1.z0.glb.clouddn.com/%E9%80%8F%E8%A7%86%E6%8A%95%E5%BD%B1.png">
+<meta property="og:image" content="http://7otic0.com1.z0.glb.clouddn.com/perpective.png">
+<meta property="og:image" content="http://7otic0.com1.z0.glb.clouddn.com/vector.png">
+<meta property="og:updated_time" content="2017-09-08T09:33:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS3D变换以及透视、阴影详解">
+<meta name="twitter:description" content="Background最近在学习iOS Core Animation相关的内容，第五章3D变换里有一个Demo，是在屏幕上显示一个正方体，并且为其添加光照阴影，效果图如下所示：  Problem可以看到，最终的效果还是可以的，书中给出的代码具体如下： 123456789101112131415161718192021222324252627282930313233343536373839404142">
+<meta name="twitter:image" content="http://7otic0.com1.z0.glb.clouddn.com/%E6%9C%AA%E5%91%BD%E5%90%8D%202.png">
+
+  
+
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbe6" rel="stylesheet">
+
+
+  
+    <link rel="stylesheet" href="/css/personal-style.css">
+  
+
+  
+
+  
+
+  
+
+
+  
+    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  
+
+  
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+</head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">轻希</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">轻希</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/category/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/tag/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            标签
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/atom.xml"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            RSS
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="CIRCLE"
+            href="/search/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">Posts List</strong>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Background"><span class="toc-text">Background</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Problem"><span class="toc-text">Problem</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Solve"><span class="toc-text">Solve</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#程序无法正确运行"><span class="toc-text">程序无法正确运行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3D变换-amp-透视投影"><span class="toc-text">3D变换 & 透视投影</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#齐次坐标"><span class="toc-text">齐次坐标</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#仿射变换"><span class="toc-text">仿射变换</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#平移"><span class="toc-text">平移</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#旋转"><span class="toc-text">旋转</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#缩放"><span class="toc-text">缩放</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#透视投影"><span class="toc-text">透视投影</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Display"><span class="toc-text">Display</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#正方体显示"><span class="toc-text">正方体显示</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#光照阴影效果"><span class="toc-text">光照阴影效果</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reference"><span class="toc-text">Reference</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-iOS3D变换以及透视、阴影详解" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">iOS3D变换以及透视、阴影详解</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2017.09.08</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>Sugite</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/categories/🐵/">🐵</a>
+  </span>
+
+
+
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>最近在学习iOS Core Animation相关的内容，第五章3D变换里有一个Demo，是在屏幕上显示一个正方体，并且为其添加光照阴影，效果图如下所示：</p>
+<p><img src="http://7otic0.com1.z0.glb.clouddn.com/%E6%9C%AA%E5%91%BD%E5%90%8D%202.png" alt="效果图"></p>
+<h2 id="Problem"><a href="#Problem" class="headerlink" title="Problem"></a>Problem</h2><p>可以看到，最终的效果还是可以的，书中给出的代码具体如下：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#import <span class="meta-string">"ViewController.h"</span></span></div><div class="line"><span class="meta">#import <span class="meta-string">&lt;QuartzCore/QuartzCore.h&gt;</span></span></div><div class="line"><span class="meta">#import <span class="meta-string">&lt;GLKit/GLKit.h&gt;</span></span></div><div class="line"></div><div class="line"></div><div class="line"><span class="meta">#define LIGHT_DIRECTION 0, 1, -0.5</span></div><div class="line"><span class="meta">#define AMBIENT_LIGHT 0.5</span></div><div class="line"></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">ViewController</span> ()</span></div><div class="line"></div><div class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">weak</span>) <span class="keyword">IBOutlet</span> <span class="built_in">UIView</span> *containerView;</div><div class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) IBOutletCollection(<span class="built_in">UIView</span>) <span class="built_in">NSArray</span> *faces;</div><div class="line"></div><div class="line"><span class="keyword">@end</span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">ViewController</span></span></div><div class="line"></div><div class="line">- (<span class="keyword">void</span>)applyLightingToFace:(<span class="built_in">CALayer</span> *)face</div><div class="line">&#123;</div><div class="line">    <span class="comment">//add lighting layer</span></div><div class="line">    <span class="built_in">CALayer</span> *layer = [<span class="built_in">CALayer</span> layer];</div><div class="line">    layer.frame = face.bounds;</div><div class="line">    [face addSublayer:layer];</div><div class="line"></div><div class="line">    <span class="comment">//convert face transform to matrix</span></div><div class="line">    <span class="comment">//(GLKMatrix4 has the same structure as CATransform3D)</span></div><div class="line">    <span class="built_in">CATransform3D</span> transform = face.transform;</div><div class="line">    GLKMatrix4 matrix4 = *(GLKMatrix4 *)&amp;transform;</div><div class="line">    GLKMatrix3 matrix3 = GLKMatrix4GetMatrix3(matrix4);</div><div class="line"></div><div class="line">    <span class="comment">//get face normal</span></div><div class="line">    GLKVector3 normal = GLKVector3Make(<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>);</div><div class="line">    normal = GLKMatrix3MultiplyVector3(matrix3, normal);</div><div class="line">    normal = GLKVector3Normalize(normal);</div><div class="line"></div><div class="line">    <span class="comment">//get dot product with light direction</span></div><div class="line">    GLKVector3 light = GLKVector3Normalize(GLKVector3Make(LIGHT_DIRECTION));</div><div class="line">    <span class="keyword">float</span> dotProduct = GLKVector3DotProduct(light, normal);</div><div class="line"></div><div class="line">    <span class="comment">//set lighting layer opacity</span></div><div class="line">    <span class="built_in">CGFloat</span> shadow = <span class="number">1</span> + dotProduct - AMBIENT_LIGHT;</div><div class="line">    <span class="built_in">UIColor</span> *color = [<span class="built_in">UIColor</span> colorWithWhite:<span class="number">0</span> alpha:shadow];</div><div class="line">    layer.backgroundColor = color.CGColor;</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (<span class="keyword">void</span>)addFace:(<span class="built_in">NSInteger</span>)index withTransform:(<span class="built_in">CATransform3D</span>)transform</div><div class="line">&#123;</div><div class="line">    <span class="comment">//get the face view and add it to the container</span></div><div class="line">    <span class="built_in">UIView</span> *face = <span class="keyword">self</span>.faces[index];</div><div class="line">    [<span class="keyword">self</span>.containerView addSubview:face];</div><div class="line"></div><div class="line">    <span class="comment">//center the face view within the container</span></div><div class="line">    <span class="built_in">CGSize</span> containerSize = <span class="keyword">self</span>.containerView.bounds.size;</div><div class="line">    face.center = <span class="built_in">CGPointMake</span>(containerSize.width / <span class="number">2.0</span>,</div><div class="line">                              containerSize.height / <span class="number">2.0</span>);</div><div class="line"></div><div class="line">    <span class="comment">//apply the transform</span></div><div class="line">    face.layer.transform = transform;</div><div class="line"></div><div class="line">    <span class="comment">//apply lighting</span></div><div class="line">    [<span class="keyword">self</span> applyLightingToFace:face.layer];</div><div class="line">&#125;</div><div class="line"></div><div class="line">- (<span class="keyword">void</span>)viewDidLoad</div><div class="line">&#123;</div><div class="line">    [<span class="keyword">super</span> viewDidLoad];</div><div class="line"></div><div class="line">    <span class="comment">//set up the container sublayer transform</span></div><div class="line">    <span class="built_in">CATransform3D</span> perspective = <span class="built_in">CATransform3DIdentity</span>;</div><div class="line">    perspective.m34 = <span class="number">-1.0</span> / <span class="number">500.0</span>;</div><div class="line">    perspective = <span class="built_in">CATransform3DRotate</span>(perspective, -M_PI_4, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>);</div><div class="line">    perspective = <span class="built_in">CATransform3DRotate</span>(perspective, -M_PI_4, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>);</div><div class="line">    <span class="keyword">self</span>.containerView.layer.sublayerTransform = perspective;</div><div class="line"></div><div class="line">    <span class="comment">//add cube face 1</span></div><div class="line">    <span class="built_in">CATransform3D</span> transform = <span class="built_in">CATransform3DMakeTranslation</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">100</span>);</div><div class="line">    [<span class="keyword">self</span> addFace:<span class="number">0</span> withTransform:transform];</div><div class="line"></div><div class="line">    <span class="comment">//add cube face 2</span></div><div class="line">    transform = <span class="built_in">CATransform3DMakeTranslation</span>(<span class="number">100</span>, <span class="number">0</span>, <span class="number">0</span>);</div><div class="line">    transform = <span class="built_in">CATransform3DRotate</span>(transform, M_PI_2, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>);</div><div class="line">    [<span class="keyword">self</span> addFace:<span class="number">1</span> withTransform:transform];</div><div class="line"></div><div class="line">    <span class="comment">//add cube face 3</span></div><div class="line">    <span class="comment">//move this code after the setup for face no. 6 to enable button</span></div><div class="line">    transform = <span class="built_in">CATransform3DMakeTranslation</span>(<span class="number">0</span>, <span class="number">-100</span>, <span class="number">0</span>);</div><div class="line">    transform = <span class="built_in">CATransform3DRotate</span>(transform, M_PI_2, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>);</div><div class="line">    [<span class="keyword">self</span> addFace:<span class="number">2</span> withTransform:transform];</div><div class="line"></div><div class="line">    <span class="comment">//add cube face 4</span></div><div class="line">    transform = <span class="built_in">CATransform3DMakeTranslation</span>(<span class="number">0</span>, <span class="number">100</span>, <span class="number">0</span>);</div><div class="line">    transform = <span class="built_in">CATransform3DRotate</span>(transform, -M_PI_2, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>);</div><div class="line">    [<span class="keyword">self</span> addFace:<span class="number">3</span> withTransform:transform];</div><div class="line"></div><div class="line">    <span class="comment">//add cube face 5</span></div><div class="line">    transform = <span class="built_in">CATransform3DMakeTranslation</span>(<span class="number">-100</span>, <span class="number">0</span>, <span class="number">0</span>);</div><div class="line">    transform = <span class="built_in">CATransform3DRotate</span>(transform, -M_PI_2, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>);</div><div class="line">    [<span class="keyword">self</span> addFace:<span class="number">4</span> withTransform:transform];</div><div class="line"></div><div class="line">    <span class="comment">//add cube face 6</span></div><div class="line">    transform = <span class="built_in">CATransform3DMakeTranslation</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">-100</span>);</div><div class="line">    transform = <span class="built_in">CATransform3DRotate</span>(transform, M_PI, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>);</div><div class="line">    [<span class="keyword">self</span> addFace:<span class="number">5</span> withTransform:transform];</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">@end</span></div></pre></td></tr></table></figure>
+<p>但是运行的时候就有两个问题：</p>
+<ul>
+<li>程序无法正确运行</li>
+<li>即使程序正确运行，为什么会产生效果图那种界面，里面的各种变换是如何实现的</li>
+</ul>
+<h2 id="Solve"><a href="#Solve" class="headerlink" title="Solve"></a>Solve</h2><h3 id="程序无法正确运行"><a href="#程序无法正确运行" class="headerlink" title="程序无法正确运行"></a>程序无法正确运行</h3><p>直接把书上的源码拿出来编译运行的时候，会发现程序显示一片空白，并没有像效果图中那样，经过Debug发现，问题在下面这行代码：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">GLKMatrix4 matrix4 = *(GLKMatrix4 *)&amp;transform;</div></pre></td></tr></table></figure>
+<p>这其中transform是CATransform3D类型的，该类型定义如下：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">struct</span> <span class="built_in">CATransform3D</span></div><div class="line">&#123;</div><div class="line">  <span class="built_in">CGFloat</span> m11, m12, m13, m14;</div><div class="line">  <span class="built_in">CGFloat</span> m21, m22, m23, m24;</div><div class="line">  <span class="built_in">CGFloat</span> m31, m32, m33, m34;</div><div class="line">  <span class="built_in">CGFloat</span> m41, m42, m43, m44;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="built_in">CATransform3D</span> <span class="built_in">CATransform3D</span>;</div></pre></td></tr></table></figure>
+<p>而CGFloat在64位环境下是double，所以CATransform3D实际上是有16个double元素的结构体，而GLKMatrix4定义如下：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">union</span> _GLKMatrix4</div><div class="line">&#123;</div><div class="line">    <span class="keyword">struct</span></div><div class="line">    &#123;</div><div class="line">        <span class="keyword">float</span> m00, m01, m02, m03;</div><div class="line">        <span class="keyword">float</span> m10, m11, m12, m13;</div><div class="line">        <span class="keyword">float</span> m20, m21, m22, m23;</div><div class="line">        <span class="keyword">float</span> m30, m31, m32, m33;</div><div class="line">    &#125;;</div><div class="line">    <span class="keyword">float</span> m[<span class="number">16</span>];</div><div class="line">&#125; __attribute__((aligned(<span class="number">16</span>)));</div><div class="line"><span class="keyword">typedef</span> <span class="keyword">union</span> _GLKMatrix4 GLKMatrix4;</div></pre></td></tr></table></figure>
+<p>可以看到它里面是16个float元素，所以很明显，直接对transform取址再强转为GLKMatrix4类型会发生截断错误，将该行代码改为下面这样即可：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">GLKMatrix4 matrix4 = GLKMatrix4Make(transform.m11, transform.m12, transform.m13, transform.m14, transform.m21, transform.m22, transform.m23, transform.m24, transform.m31, transform.m32, transform.m33, transform.m34, transform.m41, transform.m42, transform.m43, transform.m44);</div></pre></td></tr></table></figure>
+<h3 id="3D变换-amp-透视投影"><a href="#3D变换-amp-透视投影" class="headerlink" title="3D变换 &amp; 透视投影"></a>3D变换 &amp; 透视投影</h3><h4 id="齐次坐标"><a href="#齐次坐标" class="headerlink" title="齐次坐标"></a>齐次坐标</h4><p><img src="http://7otic0.com1.z0.glb.clouddn.com/%E5%9D%90%E6%A0%87%E7%B3%BB.png" alt="坐标系"></p>
+<p>首先，在三维空间中，对于一个向量$v$以及基$o-xyz$，可以找到一组坐标$(v_1,v_2,v_3)$，使得</p>
+<p>$$v = v_1x + v_2y + v_3z \tag{1}$$</p>
+<p>而对于一个点p，则可以找到一组坐标$(p_1,p_2,p_3)$，使得</p>
+<p>$$p-o = p_1x + p_2y + p_3z\tag{2}$$</p>
+<p>从上面对向量和点的表达，我们可以看出为了在坐标系中表示一个点（如p），我们把点的位置看作是对这个基的原点o所进行的一个位移，即一个向量(p-o)（有的书中把这样的向量叫做位置向量——起始于坐标原点的特殊向量），我们在表达这个向量的同时用等价的方式表达出了点p:</p>
+<p>$$p = o + p_1 x + p_2 y + p_3 z\tag{3}$$</p>
+<p>(1)(3)是坐标系下表达一个向量和点的不同表达方式。这里可以看出，虽然都是用代数分量的形式表达向量和点，但表达一个点比一个向量需要额外的信息。如果我写出一个代数分量表达$(1, 4, 7)$，并不能确定这是一个点还是一个向量。</p>
+<p>我们现在把(1)(3)写成矩阵的形式：</p>
+<p>$$v=\begin{pmatrix} x &amp; y &amp; z &amp; o \\\end{pmatrix}\bullet\begin{pmatrix}v_1\\v_2\\v_3\\ 0\\\end{pmatrix}$$<br>$$p=\begin{pmatrix}x &amp; y &amp; z &amp; o \\\end{pmatrix}\bullet\begin{pmatrix}p_1\\p_2\\p_3\\1\\\end{pmatrix}$$</p>
+<p>这里$(x,y,z,o)$是坐标基矩阵，右边的列向量分别是向量$v$和点p在基下的坐标。这样，向量和点在同一个基下就有了不同的表达：3D向量的第4个代数分量是0，而3D点的第4个代数分量是1。像这种这种用4个代数分量表示3D几何概念的方式是一种齐次坐标表示。</p>
+<p>对于平移T、旋转R、缩放S这3个最常见的仿射变换，平移变换只对于点才有意义，因为普通向量没有位置概念，只有大小和方向，这可以通过下面的式子清楚地看出：</p>
+<p>$$\begin{pmatrix}1&amp;0&amp;0&amp;tx\\0&amp;1&amp;0&amp;ty\\0&amp;0&amp;1&amp;tz\\0&amp;0&amp;0&amp;1\\\end{pmatrix}\bullet\begin{pmatrix}x\\y\\z\\1\\\end{pmatrix}=\begin{pmatrix}x+tx\\y+ty\\z+tz\\1\\\end{pmatrix}$$<br>$$\begin{pmatrix}1&amp;0&amp;0&amp;tx\\0&amp;1&amp;0&amp;ty\\0&amp;0&amp;1&amp;tz\\0&amp;0&amp;0&amp;1\\\end{pmatrix}\bullet\begin{pmatrix}x\\y\\z\\0\\\end{pmatrix}=\begin{pmatrix}x\\y\\z\\0\\\end{pmatrix}$$</p>
+<p>而旋转和缩放对于向量和点都有意义，你可以用类似上面齐次表示来检测。从中可以看出，齐次坐标用于仿射变换非常方便。</p>
+<h4 id="仿射变换"><a href="#仿射变换" class="headerlink" title="仿射变换"></a>仿射变换</h4><p>基础的仿射变换有平移、缩放、旋转三种，下面我们以点为例来简单介绍一下这三种变换对应的变换矩阵。</p>
+<h5 id="平移"><a href="#平移" class="headerlink" title="平移"></a>平移</h5><p>在三维齐次坐标表示中，任意点$P=(x,y,z)$通过平移距离$t_x,t_y,t_z$加到P的坐标上而平移到位置$P’=(x’,y’,z’)$ ：</p>
+<p>$$x’=x+t_x,y’=y+t_y,z’=z+t_z$$</p>
+<p>在计算机中，我们为了方便程序处理，通常用矩阵形式来表达三维变换操作，这里，我们用齐次坐标4元列向量的形式表示位置$P和P’$，且变换操作T是4x4矩阵：</p>
+<p>$$\begin{pmatrix}x’\\y’\\z’\\1\\\end{pmatrix}＝\begin{pmatrix}1&amp;0&amp;0&amp;t_x\\0&amp;1&amp;0&amp;t_y\\0&amp;0&amp;1&amp;t_z\\0&amp;0&amp;0&amp;1\\\end{pmatrix}\bullet\begin{pmatrix}x\\y\\z\\1\\\end{pmatrix}$$</p>
+<p>在三维空间中，对象的平移通过平移定义该对象的各个点然后在新位置重建该对象而实现。对于由一组多边形表面表示的对象，可以将各个表面的顶点进行平移，然后重新显示新位置的面。</p>
+<h5 id="旋转"><a href="#旋转" class="headerlink" title="旋转"></a>旋转</h5><p>我们可以绕空间的任意轴旋转一个对象，但绕平行于坐标轴的轴的旋转是最容易处理的，首先我们来看绕z轴的旋转：</p>
+<p>$$x’=xcos\theta-ysin\theta\\y’=xsin\theta+ycos\theta\\z’=z$$</p>
+<p>参数$\theta$表示指定的绕z轴旋转的角度，而z坐标值在该变换中不变。三维z轴旋转方程可以用齐次坐标形式表示如下：</p>
+<p>$$\begin{pmatrix}x’\\y’\\z’\\1\\\end{pmatrix}＝\begin{pmatrix}cos\theta&amp;-sin\theta&amp;0&amp;0\\sin\theta&amp;cos\theta&amp;0&amp;0\\0&amp;0&amp;1&amp;0\\0&amp;0&amp;0&amp;1\\\end{pmatrix}\bullet\begin{pmatrix}x\\y\\z\\1\\\end{pmatrix}$$</p>
+<p>同理，可以得到x轴旋转公式：</p>
+<p>$$y’=ycos\theta-zsin\theta\\z’=ysin\theta+zcos\theta\\x’=x$$</p>
+<p>以及y轴旋转公式：</p>
+<p>$$z’=zcos\theta-xsin\theta\\x’=zsin\theta+xcos\theta\\y’=y$$</p>
+<p>相应的旋转方程如下：</p>
+<p>$$\begin{pmatrix}x’\\y’\\z’\\1\\\end{pmatrix}＝\begin{pmatrix}1&amp;0&amp;0&amp;0\\0&amp;cos\theta&amp;-sin\theta&amp;0\\0&amp;sin\theta&amp;cos\theta&amp;0\\0&amp;0&amp;0&amp;1\\\end{pmatrix}\bullet\begin{pmatrix}x\\y\\z\\1\\\end{pmatrix}$$<br>$$\begin{pmatrix}x’\\y’\\z’\\1\\\end{pmatrix}＝\begin{pmatrix}cos\theta&amp;0&amp;sin\theta&amp;0\\0&amp;1&amp;0&amp;0\\-sin\theta&amp;0&amp;cos\theta&amp;0\\0&amp;0&amp;0&amp;1\\\end{pmatrix}\bullet\begin{pmatrix}x\\y\\z\\1\\\end{pmatrix}$$</p>
+<h5 id="缩放"><a href="#缩放" class="headerlink" title="缩放"></a>缩放</h5><p>缩放比较简单，进行简单的各坐标轴方向乘积运算即可，缩放方程如下：</p>
+<p>$$\begin{pmatrix}x’\\y’\\z’\\1\\\end{pmatrix}＝\begin{pmatrix}s_x&amp;0&amp;0&amp;0\\0&amp;s_y&amp;0&amp;0\\0&amp;0&amp;x_z&amp;0\\0&amp;0&amp;0&amp;1\\\end{pmatrix}\bullet\begin{pmatrix}x\\y\\z\\1\\\end{pmatrix}$$</p>
+<h4 id="透视投影"><a href="#透视投影" class="headerlink" title="透视投影"></a>透视投影</h4><p>iOS中的CALayer的3D本质上并不能算真正的3D(其视点即观察点或者所谓的照相机的位置是无法变换的)，而只是3D在二维平面上的投影，投影平面就是手机屏幕也就是xy轴组成的平面(注意iOS中为左手坐标系)，那么视点的位置是如何确定的呢？可以通过CATransform3D中的$m_{34}$来间接指定， $m_{34} = -1/z$，其中$z$为观察点在z轴上的值,而Layer的z轴的位置则是通过anchorPoint来指定的，所谓的anchorPoint(锚点)就是在变换中保持不变的点，也就是某个Layer在变换中的原点，xyz三轴相交于此点。</p>
+<p>$m_{34} = -1/z$中，当$z$为正的时候，是我们人眼观察现实世界的效果，即在投影平面上表现出近大远小的效果，$z$越靠近原点则这种效果越明显，越远离原点则越来越不明显，当$z$为正无穷大的时候，则失去了近大远小的效果，此时投影线垂直于投影平面，也就是视点在无穷远处，CATransform3D中$m_{34}$的默认值为0，即视点在无穷远处。</p>
+<p>下面以点$P(10,0,-10)$为例看一下在iOS的透视投影机制中，三维空间上的一点是如何投影到投影平面（手机屏幕）上的。</p>
+<p><img src="http://7otic0.com1.z0.glb.clouddn.com/%E9%80%8F%E8%A7%86%E6%8A%95%E5%BD%B1.png" alt="透视投影"></p>
+<p>图中绿色点为点P，视点为观察点，也就是说，我们从视点的位置去观察P点，那么虚线就为投影线，其与x轴的交点即为投影点，通过设置$m_{34}=-1/500$，我们得到投影矩阵如下：</p>
+<p>$$\begin{pmatrix}1&amp;0&amp;0&amp;0\\0&amp;1&amp;0&amp;0\\0&amp;0&amp;1&amp;0\\0&amp;0&amp;-\frac{1}{500}&amp;1\\\end{pmatrix}$$</p>
+<p>将其与点P相乘得到：</p>
+<p>$$\begin{pmatrix}1&amp;0&amp;0&amp;0\\0&amp;1&amp;0&amp;0\\0&amp;0&amp;1&amp;0\\0&amp;0&amp;-\frac{1}{500}&amp;1\\\end{pmatrix}\bullet\begin{pmatrix}10\\0\\-10\\1\end{pmatrix}=\begin{pmatrix}10\\0\\-10\\1.02\end{pmatrix}$$</p>
+<p>将得到的点转为齐次坐标即为：</p>
+<p>$$\begin{pmatrix}10/1.02\\0\\-10/1.02\\1\end{pmatrix}$$</p>
+<p>与上面图中的示意相同。由于是直接投影到xy平面，所以直接将z坐标置为0即可。</p>
+<h2 id="Display"><a href="#Display" class="headerlink" title="Display"></a>Display</h2><h3 id="正方体显示"><a href="#正方体显示" class="headerlink" title="正方体显示"></a>正方体显示</h3><p>简单说完上述的基本理论，再回到问题，看看前文代码中所构建的正方体为何在手机屏幕上显示为那样。</p>
+<p>看代码可知，Demo中一共初始化了6个View，分别当作正方体的6面，其中每一面初始化的时候都进行了平移和旋转，可以简单想象一下，6个面经过平移旋转，恰好在三维空间内构建为一个正方体，正方体中心为坐标原点，边长为200，八个顶点坐标分别为：</p>
+<p>$$(100,100,100)\\(100,100,-100)\\(100,-100,100)\\(100,-100,-100)\\(-100,100,100)\\(-100,100,-100)\\(-100,-100,100)\\(-100,-100,-100)$$</p>
+<p>方便起见，我们只需要知道这八个点经过各种变换后在投影平面的位置就可以知道整个立方体看起来的效果。</p>
+<p>再来看看整个容器View进行了哪些变换：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">CATransform3D</span> perspective = <span class="built_in">CATransform3DIdentity</span>;</div><div class="line">perspective.m34 = <span class="number">-1.0</span> / <span class="number">500.0</span>;</div><div class="line">perspective = <span class="built_in">CATransform3DRotate</span>(perspective, -M_PI_4, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>);</div><div class="line">perspective = <span class="built_in">CATransform3DRotate</span>(perspective, -M_PI_4, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>);</div><div class="line"><span class="keyword">self</span>.containerView.layer.sublayerTransform = perspective;</div></pre></td></tr></table></figure>
+<p>可以看到，为了达到逼真的效果，程序首先将$m_{34}$进行了设置，然后将整个图层先绕x轴旋转$-45^\circ$，再绕y轴旋转了$-45^\circ$，这样一来，最终的变换矩阵perspective即为：</p>
+<p>$$<br>\begin{pmatrix}1&amp;0&amp;0&amp;0\\0&amp;1&amp;0&amp;0\\0&amp;0&amp;1&amp;0\\0&amp;0&amp;-\frac{1}{500}&amp;1\\\end{pmatrix}\bullet<br>\begin{pmatrix}<br>\frac{\sqrt 2}{2}&amp;0&amp;-\frac{\sqrt 2}{2}&amp;0\\<br>0&amp;1&amp;0&amp;0\\<br>\frac{\sqrt 2}{2}&amp;0&amp;\frac{\sqrt 2}{2}&amp;0\\<br>0&amp;0&amp;0&amp;1\\<br>\end{pmatrix}\bullet<br>\begin{pmatrix}1&amp;0&amp;0&amp;0\\<br>0&amp;\frac{\sqrt 2}{2}&amp;\frac{\sqrt 2}{2}&amp;0\\<br>0&amp;-\frac{\sqrt 2}{2}&amp;\frac{\sqrt 2}{2}&amp;0\\<br>0&amp;0&amp;0&amp;1\\\end{pmatrix}\\=<br>\begin{pmatrix}<br>\frac{\sqrt 2}{2}&amp;0&amp;-\frac{\sqrt 2}{2}&amp;0\\<br>\frac{1}{2}&amp;\frac{\sqrt 2}{2}&amp;\frac{1}{2}&amp;0\\<br>\frac{1}{2}&amp;-\frac{\sqrt 2}{2}&amp;\frac{1}{2}&amp;0\\<br>-\frac{1}{1000}&amp;\frac{\sqrt 2}{1000}&amp;-\frac{1}{1000}&amp;1\\<br>\end{pmatrix}=perspective<br>$$</p>
+<p>得到了变换矩阵，我们再将上述的八个点一一与矩阵相乘，便能得到它们在投影平面上的位置，这里以$(100,100,100,1)$为例：</p>
+<p>$$<br>\begin{pmatrix}<br>\frac{\sqrt 2}{2}&amp;0&amp;-\frac{\sqrt 2}{2}&amp;0\\<br>\frac{1}{2}&amp;\frac{\sqrt 2}{2}&amp;\frac{1}{2}&amp;0\\<br>\frac{1}{2}&amp;-\frac{\sqrt 2}{2}&amp;\frac{1}{2}&amp;0\\<br>-\frac{1}{1000}&amp;\frac{\sqrt 2}{1000}&amp;-\frac{1}{1000}&amp;1\\<br>\end{pmatrix}\bullet<br>\begin{pmatrix}100\\100\\100\\1\\\end{pmatrix}=<br>\begin{pmatrix}0\\100+50\sqrt 2\\100-50\sqrt 2\\\frac{8+\sqrt 2}{10}\\\end{pmatrix}\to<br>\begin{pmatrix}0\\181.33\\0\\1\\\end{pmatrix}<br>$$</p>
+<p>其他七个点计算如下：</p>
+<p>$$<br>(123.90,61.95,0,1)\\<br>(0,44.47,0,1)\\<br>(161.71,-82.36,0,1)\\<br>(-123.90,61.95,0,1)\\<br>(0,-21.83,0,1)\\<br>(-161.71,-82.36,0,1)\\<br>(0,-161.26,0,1)<br>$$</p>
+<p>将上述八个点在xy平面上画出来如下图所示：</p>
+<p><img src="http://7otic0.com1.z0.glb.clouddn.com/perpective.png" alt="perpective"></p>
+<p>是不是跟前面效果图中的一模一样呢。至此，我们已经了解了三维空间中的对象是如何经过一系列变换投影到手机屏幕上的，下面，我们再来看看正方体不同平面的光照阴影是如何计算的。</p>
+<h3 id="光照阴影效果"><a href="#光照阴影效果" class="headerlink" title="光照阴影效果"></a>光照阴影效果</h3><p>先来看代码：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">- (<span class="keyword">void</span>)applyLightingToFace:(<span class="built_in">CALayer</span> *)face</div><div class="line">&#123;</div><div class="line">    <span class="comment">//add lighting layer</span></div><div class="line">    <span class="built_in">CALayer</span> *layer = [<span class="built_in">CALayer</span> layer];</div><div class="line">    layer.frame = face.bounds;</div><div class="line">    [face addSublayer:layer];</div><div class="line"></div><div class="line">    <span class="comment">//convert face transform to matrix</span></div><div class="line">    <span class="comment">//(GLKMatrix4 has the same structure as CATransform3D)</span></div><div class="line">    <span class="built_in">CATransform3D</span> transform = face.transform;</div><div class="line">    GLKMatrix4 matrix4 = *(GLKMatrix4 *)&amp;transform;</div><div class="line">    GLKMatrix3 matrix3 = GLKMatrix4GetMatrix3(matrix4);</div><div class="line"></div><div class="line">    <span class="comment">//get face normal</span></div><div class="line">    GLKVector3 normal = GLKVector3Make(<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>);</div><div class="line">    normal = GLKMatrix3MultiplyVector3(matrix3, normal);</div><div class="line">    normal = GLKVector3Normalize(normal);</div><div class="line"></div><div class="line">    <span class="comment">//get dot product with light direction</span></div><div class="line">    GLKVector3 light = GLKVector3Normalize(GLKVector3Make(LIGHT_DIRECTION));</div><div class="line">    <span class="keyword">float</span> dotProduct = GLKVector3DotProduct(light, normal);</div><div class="line"></div><div class="line">    <span class="comment">//set lighting layer opacity</span></div><div class="line">    <span class="built_in">CGFloat</span> shadow = <span class="number">1</span> + dotProduct - AMBIENT_LIGHT;</div><div class="line">    <span class="built_in">UIColor</span> *color = [<span class="built_in">UIColor</span> colorWithWhite:<span class="number">0</span> alpha:shadow];</div><div class="line">    layer.backgroundColor = color.CGColor;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上述代码分为几个步骤：</p>
+<ol>
+<li>将齐次坐标的4维变换矩阵降为3维，因为这里我们是用的平行光，不需要平移，而原始变换矩阵的第四维主要是平移以及透视投影用，所以这里直接用前3维即可。</li>
+<li>获取照射平面的法向量。因为我们的每个面都是由初始的平行于xy平面的面经过一系列变换而来，而初始平面的法向量是$(0,0,1)$，所以我们只需要将初始法向量经过同样的变换，即可求得照射平面的法向量。</li>
+<li>将光照向量与照射平面法向量做点积运算，即可求得光照向量在照射平面的投影，推导如下：</li>
+</ol>
+<p><img src="http://7otic0.com1.z0.glb.clouddn.com/vector.png" alt="vector"></p>
+<p>假设$u$在$v$上的投影向量是$u’$，且向量$u$和$v$的夹角为$\theta$。一个向量有两个属性，大小和方向，我们先确定$u’$的大小（即长度，或者模），从$u$的末端做$v$的垂线，那么$d$就是$u’$的长度。而$u’$和$v$的方向是相同的，$v$的方向$v/|v|$也就是$u’$的方向。所以有</p>
+<p>$$u’=d\frac{v}{|v|}\tag{1}$$</p>
+<p>再求$d$的长度</p>
+<p>$$d=|u|cos\theta\tag{2}$$</p>
+<p>最后求$cos\theta$</p>
+<p>$$cos\theta=\frac{u\cdot v}{|u||v|}\tag{3}$$</p>
+<p>得到</p>
+<p>$$u’=\frac{u\cdot v}{|v|^2}v$$</p>
+<p>这就是最终的投影向量，长度$d$则为</p>
+<p>$$|u’|=|u|cos\theta=|u|\frac{u\cdot v}{|u||v|}=\frac{u\cdot v}{|v|}$$</p>
+<p>因为$v$是单位向量，长度为一，所以最终的光强反应在代码中就是两个向量做点积。</p>
+<p>至此，整个代码都已经非常清楚了，完。</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><a href="https://www.amazon.com/iOS-Core-Animation-Advanced-Techniques-ebook/dp/B00EHJCORC" target="_blank" rel="external">iOS Core Animation: Advanced Techniques</a></li>
+<li><a href="https://www.amazon.com/Computer-Graphics-Open-GL-4th/dp/0136053580" target="_blank" rel="external">Computer Graphics with Open GL</a></li>
+<li><a href="http://geeklu.com/2012/07/ios-3d-perspective/" target="_blank" rel="external">iOS的三维透视投影</a></li>
+<li><a href="http://blog.csdn.net/popy007/article/details/1797121" target="_blank" rel="external">深入探索透视投影变换</a></li>
+</ul>
+
+    
+  </div>
+</article>
+
+
+   
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2016/08/17/iOS中的Hit-Testing/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="hide pull-right" href="/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">Close</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/category/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/tag/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              标签
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/atom.xml"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              RSS
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="CIRCLE"
+              href="/search/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              搜索
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+
+    
+
+
+
+
+    
+
+    
+	
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>
