@@ -1,0 +1,27 @@
+
+
+:Name:            "TL82 Warm-Up NewBlood Open Tourney"
+:Event:           0
+:Time:            10
+:Inc:             15
+:Mode:            Rated
+:Variant:         Chess
+:Wild:            0
+:Board:           -
+:Style:           Swiss System, 4 rounds
+:TieBreaker:      No
+:NoEscape:        0
+:Rounds:          4
+:PlayerLimit:     -
+:MaxRating:       none
+:MinRating:       none
+:AllowedList:     -
+:Computers:       No
+:Invitation:      No
+:Keep:            No
+:LateJoins:       1
+:HalfJoins:       0
+:Byes:            0
+:MaxByes:         0
+:EntryMessage:    "Welcome to the TL82 Warm-Up NewBlood Open Tourney. Please follow the directions given to you in channel 49. Make sure you have your noescape variable off ("set noescape 0"). You are expected to play the tournament in full and to follow the rules of the server and basic sportsmanship. For any questions or problems, please contact the TD. Happy Chess! :-)"
+:ExtraInfo:       -
