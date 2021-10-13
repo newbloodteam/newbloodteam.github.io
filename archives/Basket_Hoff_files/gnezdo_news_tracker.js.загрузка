@@ -1,0 +1,42 @@
+var gnezdo_check_tracker;
+var gnezdo_base_domain = "https://fcgi5.gnezdo.ru";
+if (!gnezdo_check_tracker){
+	function gnezdo_news_retarget(o){
+		if (o === undefined) {o = {}};
+		if (o.productid === undefined) {o.productid = ''};
+		if (o.pagetype === undefined) {o.pagetype = 'other'};
+		if (typeof(o.productid) === 'object'){
+			o.productid = o.productid.join(',');
+		}
+		if (o.productid){
+			new Image().src = gnezdo_base_domain+"/e/?pt="+o.pagetype+"&rids="+o.productid+"&dr="+escape(document.referrer)+"&du="+escape(document.URL)+"&"+Math.random();
+		}
+	}
+	
+	function gnezdo_news(js, e, t){
+		if (js === undefined) {js = ''};
+		if (e === undefined) {e = ''};
+		if (t === undefined) {t = ''};
+		new Image().src = gnezdo_base_domain+"/e/?js="+js+"&e="+e+"&t="+t+"&dr="+escape(document.referrer)+"&du="+escape(document.URL)+"&"+Math.random();
+	}
+	gnezdo_news();
+
+	function gnezdo_news_event(e){
+		if(!window.gnezdo_news_event[e.type]){
+			gnezdo_news(undefined, e.type, new Date().getTime()-window.gnezdo_news_event.time);
+			window.removeEventListener(e.type, gnezdo_news_event, {once:true});
+			window.gnezdo_news_event[e.type] = 1;
+		}
+	}
+	window.gnezdo_news_event.time = new Date().getTime();
+
+	if(navigator.userAgent && !navigator.userAgent.match(/Trident\/7/)){
+		window.addEventListener("scroll", gnezdo_news_event, {once:true});
+		window.addEventListener("mousemove", gnezdo_news_event, {once:true});
+		window.addEventListener("beforeunload", gnezdo_news_event, {once:true});
+		window.addEventListener("click", gnezdo_news_event, {once:true});
+		window.addEventListener("touchmove", gnezdo_news_event, {once:true});
+	}
+	
+	gnezdo_check_tracker = 1;
+}
